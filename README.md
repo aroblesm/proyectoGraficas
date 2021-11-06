@@ -1,4 +1,4 @@
-# Spotify Hall of Fame
+# Spotify hall of fame
 
 Proyecto final de la materia Gráficas computacionales
 
@@ -8,7 +8,6 @@ Integrantes:
 
 - Alejandra Robles Macías
 - Manuel Ahumada Rodríguez
-- Mario Emilio Jiménez Vizcaíno
 
 ## Requerimientos
 
