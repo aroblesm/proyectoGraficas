@@ -20,14 +20,17 @@ async function loadGLTF() {
         gltfLoader.setDRACOLoader(dracoLoad);
         const WindowNoGlassL = await gltfLoader.loadAsync("assets/3D/WindowNoGlassL/scene.gltf");
         const WindowNoGlassR = await gltfLoader.loadAsync("assets/3D/WindowNoGlassR/scene.gltf");
-        const WindowTopNoGlass = await gltfLoader.loadAsync("assets/3D/TopNoGlass/scene.gltf");
+        const WindowTopNoGlass1 = await gltfLoader.loadAsync("assets/3D/TopNoGlass/scene.gltf");
+        const WindowTopNoGlass2 = await gltfLoader.loadAsync("assets/3D/TopNoGlass/scene.gltf");
+        const WindowTopNoGlass3 = await gltfLoader.loadAsync("assets/3D/TopNoGlass/scene.gltf");
+        const WindowTopNoGlass4 = await gltfLoader.loadAsync("assets/3D/TopNoGlass/scene.gltf");
         let newMaterial = new THREE.MeshPhysicalMaterial();
 
         let windowLeft = WindowNoGlassL.scene.children[0];
         windowLeft.scale.set(0.04, 0.04, 0.04);
         windowLeft.position.x = -198;
         windowLeft.position.z = 100;
-        windowLeft.rotation.z = -Math.PI/2;
+        windowLeft.rotation.z = -Math.PI / 2;
         windowLeft.traverse(child => {
             if (child.isMesh) {
                 child.castShadow = true;
@@ -51,6 +54,75 @@ async function loadGLTF() {
                 child.material = newMaterial;;
                 child.receiveShadow = true;
                 child.material.metalness = 0.9;
+                child.material.clearcoat = 1;   
+                child.material.clearcoatRoughness = 0.6;
+                child.material.roughness = 0.9;
+            }
+        });
+
+        let windowTop1 = WindowTopNoGlass1.scene.children[0];
+        windowTop1.scale.set(30, 30, 30);
+        windowTop1.position.y = 70;
+        windowTop1.position.z = 25;
+        windowTop1.traverse(child => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.material = newMaterial;;
+                child.receiveShadow = true;
+                child.material.metalness = 0.9;
+                child.material.clearcoat = 1;
+                child.material.clearcoatRoughness = 0.6;
+                child.material.roughness = 0.9;
+            }
+        });
+
+        let windowTop2 = WindowTopNoGlass2.scene.children[0];
+        windowTop2.scale.set(30, 30, 30);
+        windowTop2.rotation.z = 32.99;
+        windowTop2.position.y = 70;
+        windowTop2.position.z = 25;
+        windowTop2.traverse(child => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.material = newMaterial;;
+                child.receiveShadow = true;
+                child.material.metalness = 0.9;
+                child.material.clearcoat = 1;
+                child.material.clearcoatRoughness = 0.6;
+                child.material.roughness = 0.9;
+            }
+        });
+
+        let windowTop3 = WindowTopNoGlass3.scene.children[0];
+        windowTop3.scale.set(30, 30, 30);
+        windowTop3.rotation.z = 110;
+        windowTop3.position.x = -3;
+        windowTop3.position.y = 70;
+        windowTop3.position.z = 25;
+        windowTop3.traverse(child => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.material = newMaterial;;
+                child.receiveShadow = true;
+                child.material.metalness = 0.9;
+                child.material.clearcoat = 1;
+                child.material.clearcoatRoughness = 0.6;
+                child.material.roughness = 0.9;
+            }
+        });
+
+        let windowTop4 = WindowTopNoGlass4.scene.children[0];
+        windowTop4.scale.set(30, 30, 30);
+        windowTop4.rotation.z = 80.1;
+        windowTop4.position.x = -3;
+        windowTop4.position.y = 70;
+        windowTop4.position.z = 25;
+        windowTop4.traverse(child => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.material = newMaterial;;
+                child.receiveShadow = true;
+                child.material.metalness = 0.9;
                 child.material.clearcoat = 1;
                 child.material.clearcoatRoughness = 0.6;
                 child.material.roughness = 0.9;
@@ -58,7 +130,7 @@ async function loadGLTF() {
         });
         //#endregion ventanas
 
-        scene.add(windowLeft, windowRight);
+        scene.add(windowLeft, windowRight, windowTop1, windowTop2, windowTop3, windowTop4);
     }
     catch (err) {
         console.error(err);
@@ -145,7 +217,7 @@ function createScene(canvas) {
     //#endregion Piso de galeria
 
     //#region paredes galeria
-    const mapUrl = "assets/Textures/BiancoMarble/BIANCO-ao.jpg";
+    const mapUrl = "assets/3D/Wall/Textures/White_Wall_NORMAL.jpg";
     const texture = new THREE.TextureLoader().load(mapUrl);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
