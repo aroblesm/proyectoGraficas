@@ -1,14 +1,99 @@
 import * as THREE from '../libs/three.js/r131/three.module.js'
-import { OrbitControls } from '../libs/three.js/r131/controls/OrbitControls.js'
 import { GLTFLoader } from '../libs/three.js/r131/loaders/GLTFLoader.js';
 import { DRACOLoader } from '../libs/three.js/r125/loaders/DRACOLoader.js';
+import { PointerLockControls } from '../libs/three.js/r131/controls/PointerLockControls.js';
 
-let renderer = null, scene = null, camera = null, orbitControls = null;
-let currentTime = Date.now();
+let camera, scene, renderer, controls, raycaster;
+
+let objects = [];
+
+let blocker, instructions;
+
+let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+
+let prevTime = Date.now();
+let velocity, direction;
 let spotLight = null;
 let ambientLight = null;
 
 const SHADOW_MAP_WIDTH = 2048, SHADOW_MAP_HEIGHT = 2048;
+const floorUrl = "assets/Textures/piso-marmol.jpg";
+
+function initPointerLock() {
+    blocker = document.getElementById('blocker');
+    instructions = document.getElementById('instructions');
+
+    controls = new PointerLockControls(camera, document.body);
+
+    controls.addEventListener('lock', function () {
+        instructions.style.display = 'none';
+        blocker.style.display = 'none';
+    });
+
+    controls.addEventListener('unlock', function () {
+        blocker.style.display = 'block';
+        instructions.style.display = '';
+    });
+
+    instructions.addEventListener('click', function () {
+        controls.lock();
+    }, false);
+
+    scene.add(controls.getObject());
+}
+
+function onKeyDown(event) {
+    switch (event.keyCode) {
+
+        case 38: // up
+        case 87: // w
+            moveForward = true;
+            break;
+
+        case 37: // left
+        case 65: // a
+            moveLeft = true;
+            break;
+
+        case 40: // down
+        case 83: // s
+            moveBackward = true;
+            break;
+
+        case 39: // right
+        case 68: // d
+            moveRight = true;
+            break;
+    }
+
+}
+
+function onKeyUp(event) {
+
+    switch (event.keyCode) {
+
+        case 38: // up
+        case 87: // w
+            moveForward = false;
+            break;
+
+        case 37: // left
+        case 65: // a
+            moveLeft = false;
+            break;
+
+        case 40: // down
+        case 83: // s
+            moveBackward = false;
+            break;
+
+        case 39: // right
+        case 68: // d
+            moveRight = false;
+            break;
+
+    }
+}
 
 async function loadGLTF() {
     try {
@@ -27,9 +112,9 @@ async function loadGLTF() {
         let newMaterial = new THREE.MeshPhysicalMaterial();
 
         let windowLeft = WindowNoGlassL.scene.children[0];
-        windowLeft.scale.set(0.04, 0.04, 0.04);
-        windowLeft.position.x = -198;
-        windowLeft.position.z = 100;
+        windowLeft.scale.set(0.08, 0.08, 0.08);
+        windowLeft.position.x = -499;
+        windowLeft.position.z = 190;
         windowLeft.rotation.z = -Math.PI / 2;
         windowLeft.traverse(child => {
             if (child.isMesh) {
@@ -44,9 +129,9 @@ async function loadGLTF() {
         });
 
         let windowRight = WindowNoGlassR.scene.children[0];
-        windowRight.scale.set(0.04, 0.04, 0.04);
-        windowRight.position.x = -198;
-        windowRight.position.z = -35;
+        windowRight.scale.set(0.08, 0.08, 0.08);
+        windowRight.position.x = -499;
+        windowRight.position.z = -85;
         windowRight.rotation.z = -Math.PI / 2;
         windowRight.traverse(child => {
             if (child.isMesh) {
@@ -54,7 +139,7 @@ async function loadGLTF() {
                 child.material = newMaterial;;
                 child.receiveShadow = true;
                 child.material.metalness = 0.9;
-                child.material.clearcoat = 1;   
+                child.material.clearcoat = 1;
                 child.material.clearcoatRoughness = 0.6;
                 child.material.roughness = 0.9;
             }
@@ -62,7 +147,7 @@ async function loadGLTF() {
 
         let windowTop1 = WindowTopNoGlass1.scene.children[0];
         windowTop1.scale.set(30, 30, 30);
-        windowTop1.position.y = 70;
+        windowTop1.position.y = 120;
         windowTop1.position.z = 25;
         windowTop1.traverse(child => {
             if (child.isMesh) {
@@ -79,7 +164,7 @@ async function loadGLTF() {
         let windowTop2 = WindowTopNoGlass2.scene.children[0];
         windowTop2.scale.set(30, 30, 30);
         windowTop2.rotation.z = 32.99;
-        windowTop2.position.y = 70;
+        windowTop2.position.y = 120;
         windowTop2.position.z = 25;
         windowTop2.traverse(child => {
             if (child.isMesh) {
@@ -97,7 +182,7 @@ async function loadGLTF() {
         windowTop3.scale.set(30, 30, 30);
         windowTop3.rotation.z = 110;
         windowTop3.position.x = -3;
-        windowTop3.position.y = 70;
+        windowTop3.position.y = 120;
         windowTop3.position.z = 25;
         windowTop3.traverse(child => {
             if (child.isMesh) {
@@ -115,7 +200,7 @@ async function loadGLTF() {
         windowTop4.scale.set(30, 30, 30);
         windowTop4.rotation.z = 80.1;
         windowTop4.position.x = -3;
-        windowTop4.position.y = 70;
+        windowTop4.position.y = 120;
         windowTop4.position.z = 25;
         windowTop4.traverse(child => {
             if (child.isMesh) {
@@ -137,127 +222,157 @@ async function loadGLTF() {
     }
 }
 
-function animate() {
-    const now = Date.now();
-    const deltat = now - currentTime;
-    currentTime = now;
-}
-
-function update() {
-    requestAnimationFrame(() => update());
-
-    renderer.render(scene, camera);
-
-    animate();
-
-    orbitControls.update();
-}
-
 function createScene(canvas) {
     renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
     renderer.setSize(canvas.width, canvas.height);
+
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
+    velocity = new THREE.Vector3();
+    direction = new THREE.Vector3();
+
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+
     scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xffffff);
 
-    camera = new THREE.PerspectiveCamera(60, canvas.width / canvas.height, 1, 4000);
-    camera.position.set(30, 10, 20);
+    // A light source positioned directly above the scene, with color fading from the sky color to the ground color. 
+    // HemisphereLight( skyColor, groundColor, intensity )
+    // skyColor - (optional) hexadecimal color of the sky. Default is 0xffffff.
+    // groundColor - (optional) hexadecimal color of the ground. Default is 0xffffff.
+    // intensity - (optional) numeric value of the light's strength/intensity. Default is 1.
 
-    orbitControls = new OrbitControls(camera, renderer.domElement);
+    let light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
+    light.position.set(0.5, 1, 0.75);
+    scene.add(light);
 
-    spotLight = new THREE.SpotLight(0xffffff);
-    spotLight.position.set(-30, 15, -10);
-    spotLight.target.position.set(0, 0, 0);
+    document.addEventListener('keydown', onKeyDown, false);
+    document.addEventListener('keyup', onKeyUp, false);
 
-    spotLight.castShadow = true;
-    spotLight.shadow.camera.near = 1;
-    spotLight.shadow.camera.far = 200;
-    spotLight.shadow.camera.fov = 60;
-    spotLight.shadow.mapSize.width = SHADOW_MAP_WIDTH;
-    spotLight.shadow.mapSize.height = SHADOW_MAP_HEIGHT;
-    scene.add(spotLight);
+    // Raycaster( origin, direction, near, far )
+    // origin — The origin vector where the ray casts from.
+    // direction — The direction vector that gives direction to the ray. Should be normalized.
+    // near — All results returned are further away than near. Near can't be negative. Default value is 0.
+    // far — All results returned are closer then far. Far can't be lower then near . Default value is Infinity.
+    raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 15);
 
-    ambientLight = new THREE.AmbientLight(0xbbbbbb, 1.0);
-    scene.add(ambientLight);
+    //#region piso de galeria
+    let map = new THREE.TextureLoader().load(floorUrl);
+    map.wrapS = map.wrapT = THREE.MirroredRepeatWrapping;
+    map.repeat.set(6,6);
 
-    loadGLTF();
-
-    //#region Piso de galeria 
-    let marbleAlphaMap, marbleMap, marbleNormalMap, grassMap;
-    marbleMap = new THREE.TextureLoader().load("assets/Textures/BazaltMarble/BAZALT-diffuse.jpg"), [];
-    marbleMap.wrapS = THREE.MirroredRepeatWrapping;
-    marbleMap.wrapT = THREE.MirroredRepeatWrapping;
-    marbleMap.repeat.set(4.6, 4.6);
-
-    marbleAlphaMap = new THREE.TextureLoader().load("assets/Textures/BazaltMarble/BAZALT-ao.jpg"), [];
-    marbleAlphaMap.wrapS = THREE.MirroredRepeatWrapping;
-    marbleAlphaMap.wrapT = THREE.MirroredRepeatWrapping;
-    marbleAlphaMap.repeat.set(4.6, 4.6);
-
-    marbleNormalMap = new THREE.TextureLoader().load("assets/Textures/BazaltMarble/BAZALT-normal.jpg"), [];
-    marbleNormalMap.wrapS = THREE.MirroredRepeatWrapping;
-    marbleNormalMap.wrapT = THREE.MirroredRepeatWrapping;
-    marbleNormalMap.repeat.set(4.6, 4.6);
-
-    grassMap = new THREE.TextureLoader().load("assets/Textures/Grass/GrassGreenTexture0002.jpg"), [];
-    grassMap.wrapS = THREE.RepeatWrapping;
-    grassMap.wrapT = THREE.RepeatWrapping;
-    grassMap.repeat.set(70, 70);
-
-    let color = 0xffffff;
-
-    const geometry = new THREE.PlaneGeometry(400, 400);
-    const floor = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({ color: color, map: marbleMap, side: THREE.DoubleSide }));
+    let floorGeometry = new THREE.PlaneGeometry(1000, 1000, 100, 100);
+    let floor = new THREE.Mesh(floorGeometry, new THREE.MeshPhongMaterial({ color: 0xffffff, map: map, side: THREE.DoubleSide }));
     floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -75;
+    floor.position.y = -124;
     floor.position.z = 22;
     floor.castShadow = false;
     floor.receiveShadow = true;
-    //#endregion Piso de galeria
+    //#endregion piso de galeria
 
     //#region paredes galeria
-    const mapUrl = "assets/3D/Wall/Textures/White_Wall_NORMAL.jpg";
-    const texture = new THREE.TextureLoader().load(mapUrl);
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(20, 20);
+    let marbleAlphaMap;
+    marbleAlphaMap = new THREE.TextureLoader().load("assets/Textures/wall_white.jpg"), [];
+    marbleAlphaMap.wrapS = THREE.MirroredRepeatWrapping;
+    marbleAlphaMap.wrapT = THREE.MirroredRepeatWrapping;
+    marbleAlphaMap.repeat.set(7, 7);
 
-    const geometryWallFront = new THREE.BoxGeometry(400, 150, 1);
-    const wallFront = new THREE.Mesh(geometryWallFront, new THREE.MeshPhongMaterial({ color: color, map: marbleAlphaMap, side: THREE.DoubleSide }));
-    wallFront.position.z = -178;
+    const geometryWallFront = new THREE.BoxGeometry(1000, 250, 1);
+    const wallFront = new THREE.Mesh(geometryWallFront, new THREE.MeshPhongMaterial({ color: 0xffffff, map: marbleAlphaMap, side: THREE.DoubleSide }));
+    wallFront.position.z = -478;
     wallFront.castShadow = false;
     wallFront.receiveShadow = true;
 
-    const geometryWallBack = new THREE.BoxGeometry(400, 150, 1);
-    const wallBack = new THREE.Mesh(geometryWallBack, new THREE.MeshPhongMaterial({ color: color, map: marbleAlphaMap, side: THREE.DoubleSide }));
-    wallBack.position.z = 220;
+    const geometryWallBack = new THREE.BoxGeometry(1000, 250, 1);
+    const wallBack = new THREE.Mesh(geometryWallBack, new THREE.MeshPhongMaterial({ color: 0xffffff, map: marbleAlphaMap, side: THREE.DoubleSide }));
+    wallBack.position.z = 522;
     wallBack.castShadow = false;
     wallBack.receiveShadow = true;
 
-    const geometryWallLeft = new THREE.BoxGeometry(1, 150, 399);
-    const wallLeft = new THREE.Mesh(geometryWallLeft, new THREE.MeshPhongMaterial({ color: color, map: marbleAlphaMap, side: THREE.DoubleSide }));
-    wallLeft.position.x = -200;
-    wallLeft.position.z = 20;
+    const geometryWallLeft = new THREE.BoxGeometry(1, 250, 999);
+    const wallLeft = new THREE.Mesh(geometryWallLeft, new THREE.MeshPhongMaterial({ color: 0xffffff, map: marbleAlphaMap, side: THREE.DoubleSide }));
+    wallLeft.position.x = -500;
+    wallLeft.position.z = 22;
     wallLeft.castShadow = false;
     wallLeft.receiveShadow = true;
 
-    const geometryWallRight = new THREE.BoxGeometry(1, 150, 399);
-    const wallRight = new THREE.Mesh(geometryWallRight, new THREE.MeshPhongMaterial({ color: color, map: marbleAlphaMap, side: THREE.DoubleSide }));
-    wallRight.position.x = 200;
-    wallRight.position.z = 20.5;
+    const geometryWallRight = new THREE.BoxGeometry(1, 250, 999);
+    const wallRight = new THREE.Mesh(geometryWallRight, new THREE.MeshPhongMaterial({ color: 0xffffff, map: marbleAlphaMap, side: THREE.DoubleSide }));
+    wallRight.position.x = 500;
+    wallRight.position.z = 22;
     wallRight.castShadow = false;
     wallRight.receiveShadow = true;
 
-    const geometryWallTop = new THREE.BoxGeometry(400, 1, 400);
-    const wallTop = new THREE.Mesh(geometryWallTop, new THREE.MeshPhongMaterial({ color: color, map: marbleAlphaMap, side: THREE.DoubleSide }));
-    wallTop.position.y = 75;
+    const geometryWallTop = new THREE.BoxGeometry(1000, 1, 1000);
+    const wallTop = new THREE.Mesh(geometryWallTop, new THREE.MeshPhongMaterial({ color: 0xffffff, map: marbleAlphaMap, side: THREE.DoubleSide }));
+    wallTop.position.y = 124;
     wallTop.position.z = 20.5;
     wallTop.castShadow = false;
     wallTop.receiveShadow = true;
     //#endregion paredes galeria
 
     scene.add(floor, wallFront, wallBack, wallLeft, wallRight, wallTop);
+
+    //scene.add(floor);
+    // objects
+
+    loadGLTF();
+    initPointerLock();
+}
+
+function update() {
+    requestAnimationFrame(update);
+
+    if (controls.isLocked === true) {
+        raycaster.ray.origin.copy(controls.getObject().position);
+        raycaster.ray.origin.y -= 10;
+
+        let intersections = raycaster.intersectObjects(objects);
+        let onObject = intersections.length > 0;
+        let time = Date.now();
+        let delta = (time - prevTime) / 100;
+
+        velocity.x -= velocity.x * 10.0 * delta;
+        velocity.z -= velocity.z * 10.0 * delta;
+        velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+
+        direction.z = Number(moveForward) - Number(moveBackward);
+        direction.x = Number(moveRight) - Number(moveLeft);
+
+        direction.normalize(); // this ensures consistent movements in all directions
+
+        if (moveForward || moveBackward) velocity.z -= direction.z * 400.0 * delta;
+
+        if (moveLeft || moveRight) velocity.x -= direction.x * 400.0 * delta;
+
+        if (onObject === true) {
+            velocity.y = Math.max(0, velocity.y);
+        }
+
+        controls.moveRight(- velocity.x * delta);
+        controls.moveForward(- velocity.z * delta);
+
+        controls.getObject().position.y += (velocity.y * delta); // new behavior
+
+        if (controls.getObject().position.y < 10) {
+            velocity.y = 0;
+            controls.getObject().position.y = 10;
+        }
+
+        prevTime = time;
+    }
+
+    renderer.render(scene, camera);
+
+}
+
+function main() {
+    const canvas = document.getElementById("webglcanvas");
+
+    createScene(canvas);
+
+    update();
 }
 
 function resize() {
@@ -272,15 +387,9 @@ function resize() {
     renderer.setSize(canvas.width, canvas.height);
 }
 
-function main() {
-    const canvas = document.getElementById("webglcanvas");
-    window.addEventListener('resize', resize, false);
-
-    createScene(canvas);
-
+window.onload = () => {
+    main();
     resize();
+};
 
-    update();
-}
-
-main();
+window.addEventListener('resize', resize, false);

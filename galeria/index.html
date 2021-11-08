@@ -1,27 +1,40 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>Music Gallery</title>
+    <title>Music Gallery</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="./style/css/style.css" />
+    <script type="module" defer src="musicGallery.js"></script>
 
+    <style>
+        body {
+            width: 100vw;
+            height: 100vh;
+            margin: 0px;
+            border: 0;
+            overflow: hidden;
+        }
+    </style>
 
-  <link rel="stylesheet" href="./style/css/main.css" />
-  <link rel="stylesheet" href="./style/css/objects.css" />
-
-  <script type="module" src="musicGallery.js">
-
-  </script>
 
 </head>
 
 <body>
-  <div id="container">
-    <canvas id="webglcanvas" width=800 height=600></canvas>
-    <div id="title">
-      Drag the mouse to rotate the camera<br>Use the scroll wheel to zoom.
-    </div>
-  </div>
-</body>
 
+    <div id="blocker">
+        <div id="instructions">
+            <span style="font-size:40px">Click to play</span>
+            <br />
+            (W, A, S, D = Move, MOUSE = Look around)
+        </div>
+    </div>
+
+    <div id="container">
+        <canvas id="webglcanvas"></canvas>
+    </div>
+
+</body>
 
 </html>
