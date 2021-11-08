@@ -13,10 +13,9 @@ let moveForward = false, moveBackward = false, moveLeft = false, moveRight = fal
 
 let prevTime = Date.now();
 let velocity, direction;
-let spotLight = null;
-let ambientLight = null;
 
-const SHADOW_MAP_WIDTH = 2048, SHADOW_MAP_HEIGHT = 2048;
+let directionalLight = null, spotLight = null, ambientLight = null;
+
 const floorUrl = "assets/Textures/piso-marmol.jpg";
 
 function initPointerLock() {
@@ -69,9 +68,7 @@ function onKeyDown(event) {
 }
 
 function onKeyUp(event) {
-
     switch (event.keyCode) {
-
         case 38: // up
         case 87: // w
             moveForward = false;
@@ -91,7 +88,6 @@ function onKeyUp(event) {
         case 68: // d
             moveRight = false;
             break;
-
     }
 }
 
@@ -109,6 +105,8 @@ async function loadGLTF() {
         const WindowTopNoGlass2 = await gltfLoader.loadAsync("assets/3D/TopNoGlass/scene.gltf");
         const WindowTopNoGlass3 = await gltfLoader.loadAsync("assets/3D/TopNoGlass/scene.gltf");
         const WindowTopNoGlass4 = await gltfLoader.loadAsync("assets/3D/TopNoGlass/scene.gltf");
+        const bancoMetal1 = await gltfLoader.loadAsync("assets/3D/Bench/scene.gltf");
+        const bancoMetal2 = await gltfLoader.loadAsync("assets/3D/Bench/scene.gltf");
         let newMaterial = new THREE.MeshPhysicalMaterial();
 
         let windowLeft = WindowNoGlassL.scene.children[0];
@@ -213,9 +211,48 @@ async function loadGLTF() {
                 child.material.roughness = 0.9;
             }
         });
-        //#endregion ventanas
 
         scene.add(windowLeft, windowRight, windowTop1, windowTop2, windowTop3, windowTop4);
+        //#endregion ventanas
+
+        //#region muebles y decoracion
+        let banco1 = bancoMetal1.scene.children[0];
+        banco1.scale.set(1,1,1);
+        banco1.position.x = -260;
+        banco1.position.y = -130;
+        banco1.rotation.z = -Math.PI / 2;
+        banco1.traverse(function (child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.material.toneMapped = false;
+                child.material.metalness = 0.1;
+                child.material.roughness = 1;
+                child.material.clearcoat = 0.9;
+                child.material.clearcoatRoughness = 0.1;
+            }
+        });
+
+        let banco2 = bancoMetal2.scene.children[0];
+        banco2.scale.set(1,1,1);
+        banco2.position.x = -130;
+        banco2.position.y = -130;
+        banco2.position.z = 130;
+        banco2.rotation.x = -Math.PI / 2;
+        banco2.traverse(function (child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.material.toneMapped = false;
+                child.material.metalness = 0.1;
+                child.material.roughness = 1;
+                child.material.clearcoat = 0.9;
+                child.material.clearcoatRoughness = 0.1;
+            }
+        });
+
+        scene.add(banco1, banco2);
+        //#endregion muebles y decoracion
     }
     catch (err) {
         console.error(err);
@@ -235,7 +272,19 @@ function createScene(canvas) {
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xffffff);
+    // scene.background = new THREE.Color(0xffffff);
+
+    /*  directionalLight = new THREE.DirectionalLight( 0xaaaaaa, 1);
+        directionalLight.position.set(0, 5, 100);
+    
+        scene.add(directionalLight); */
+
+    /*  spotLight = new THREE.SpotLight (0xffffff);
+        spotLight.position.set(0, 8, 100);
+        scene.add(spotLight); */
+
+    ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    scene.add(ambientLight);
 
     // A light source positioned directly above the scene, with color fading from the sky color to the ground color. 
     // HemisphereLight( skyColor, groundColor, intensity )
@@ -244,7 +293,7 @@ function createScene(canvas) {
     // intensity - (optional) numeric value of the light's strength/intensity. Default is 1.
 
     let light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
-    light.position.set(0.5, 1, 0.75);
+    light.position.set(0, -124, 22);
     scene.add(light);
 
     document.addEventListener('keydown', onKeyDown, false);
@@ -260,7 +309,7 @@ function createScene(canvas) {
     //#region piso de galeria
     let map = new THREE.TextureLoader().load(floorUrl);
     map.wrapS = map.wrapT = THREE.MirroredRepeatWrapping;
-    map.repeat.set(6,6);
+    map.repeat.set(6, 6);
 
     let floorGeometry = new THREE.PlaneGeometry(1000, 1000, 100, 100);
     let floor = new THREE.Mesh(floorGeometry, new THREE.MeshPhongMaterial({ color: 0xffffff, map: map, side: THREE.DoubleSide }));
@@ -279,7 +328,7 @@ function createScene(canvas) {
     marbleAlphaMap.repeat.set(7, 7);
 
     const geometryWallFront = new THREE.BoxGeometry(1000, 250, 1);
-    const wallFront = new THREE.Mesh(geometryWallFront, new THREE.MeshPhongMaterial({ color: 0xffffff, map: marbleAlphaMap, side: THREE.DoubleSide }));
+    let wallFront = new THREE.Mesh(geometryWallFront, new THREE.MeshLambertMaterial({ color: 0xffffff, map: marbleAlphaMap, side: THREE.DoubleSide }));
     wallFront.position.z = -478;
     wallFront.castShadow = false;
     wallFront.receiveShadow = true;
@@ -310,12 +359,24 @@ function createScene(canvas) {
     wallTop.position.z = 20.5;
     wallTop.castShadow = false;
     wallTop.receiveShadow = true;
-    //#endregion paredes galeria
 
     scene.add(floor, wallFront, wallBack, wallLeft, wallRight, wallTop);
 
-    //scene.add(floor);
-    // objects
+    const geometryWallDivision1 = new THREE.BoxGeometry(1, 250, 999);
+    const wallDivision1 = new THREE.Mesh(geometryWallDivision1, new THREE.MeshPhongMaterial({ color: 0xffffff, map: marbleAlphaMap, side: THREE.DoubleSide }));
+    wallDivision1.position.x = 200;
+    wallDivision1.position.z = 22;
+    wallDivision1.castShadow = false;
+    wallDivision1.receiveShadow = true;
+
+    const geometryWallDivision2 = new THREE.BoxGeometry(300, 250, 1);
+    const wallDivision2 = new THREE.Mesh(geometryWallDivision2, new THREE.MeshPhongMaterial({ color: 0xffffff, map: marbleAlphaMap, side: THREE.DoubleSide }));
+    wallDivision2.position.x = 350;
+    wallDivision2.castShadow = false;
+    wallDivision2.receiveShadow = true;
+    //#endregion paredes galeria
+
+    scene.add(wallDivision1, wallDivision2);
 
     loadGLTF();
     initPointerLock();
@@ -352,7 +413,6 @@ function update() {
 
         controls.moveRight(- velocity.x * delta);
         controls.moveForward(- velocity.z * delta);
-
         controls.getObject().position.y += (velocity.y * delta); // new behavior
 
         if (controls.getObject().position.y < 10) {
@@ -362,16 +422,13 @@ function update() {
 
         prevTime = time;
     }
-
     renderer.render(scene, camera);
-
 }
 
 function main() {
     const canvas = document.getElementById("webglcanvas");
 
     createScene(canvas);
-
     update();
 }
 
