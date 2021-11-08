@@ -101,10 +101,10 @@ async function loadGLTF() {
         gltfLoader.setDRACOLoader(dracoLoad);
         const WindowNoGlassL = await gltfLoader.loadAsync("assets/3D/WindowNoGlassL/scene.gltf");
         const WindowNoGlassR = await gltfLoader.loadAsync("assets/3D/WindowNoGlassR/scene.gltf");
-        const WindowTopNoGlass1 = await gltfLoader.loadAsync("assets/3D/TopNoGlass/scene.gltf");
-        const WindowTopNoGlass2 = await gltfLoader.loadAsync("assets/3D/TopNoGlass/scene.gltf");
-        const WindowTopNoGlass3 = await gltfLoader.loadAsync("assets/3D/TopNoGlass/scene.gltf");
-        const WindowTopNoGlass4 = await gltfLoader.loadAsync("assets/3D/TopNoGlass/scene.gltf");
+        /*      const WindowTopNoGlass1 = await gltfLoader.loadAsync("assets/3D/TopNoGlass/scene.gltf");
+                const WindowTopNoGlass2 = await gltfLoader.loadAsync("assets/3D/TopNoGlass/scene.gltf");
+                const WindowTopNoGlass3 = await gltfLoader.loadAsync("assets/3D/TopNoGlass/scene.gltf");
+                const WindowTopNoGlass4 = await gltfLoader.loadAsync("assets/3D/TopNoGlass/scene.gltf"); */
         const bancoMetal1 = await gltfLoader.loadAsync("assets/3D/Bench/scene.gltf");
         const bancoMetal2 = await gltfLoader.loadAsync("assets/3D/Bench/scene.gltf");
         let newMaterial = new THREE.MeshPhysicalMaterial();
@@ -143,7 +143,9 @@ async function loadGLTF() {
             }
         });
 
-        let windowTop1 = WindowTopNoGlass1.scene.children[0];
+        scene.add(windowLeft, windowRight);
+
+        /*let windowTop1 = WindowTopNoGlass1.scene.children[0];
         windowTop1.scale.set(30, 30, 30);
         windowTop1.position.y = 120;
         windowTop1.position.z = 25;
@@ -212,12 +214,12 @@ async function loadGLTF() {
             }
         });
 
-        scene.add(windowLeft, windowRight, windowTop1, windowTop2, windowTop3, windowTop4);
+        scene.add(windowTop1, windowTop2, windowTop3, windowTop4);*/
         //#endregion ventanas
 
         //#region muebles y decoracion
         let banco1 = bancoMetal1.scene.children[0];
-        banco1.scale.set(1,1,1);
+        banco1.scale.set(1, 1, 1);
         banco1.position.x = -260;
         banco1.position.y = -130;
         banco1.rotation.z = -Math.PI / 2;
@@ -234,7 +236,7 @@ async function loadGLTF() {
         });
 
         let banco2 = bancoMetal2.scene.children[0];
-        banco2.scale.set(1,1,1);
+        banco2.scale.set(1, 1, 1);
         banco2.position.x = -130;
         banco2.position.y = -130;
         banco2.position.z = 130;
@@ -272,7 +274,7 @@ function createScene(canvas) {
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
 
     scene = new THREE.Scene();
-    // scene.background = new THREE.Color(0xffffff);
+    scene.background = new THREE.Color(0xffffff);
 
     /*  directionalLight = new THREE.DirectionalLight( 0xaaaaaa, 1);
         directionalLight.position.set(0, 5, 100);
@@ -362,16 +364,17 @@ function createScene(canvas) {
 
     scene.add(floor, wallFront, wallBack, wallLeft, wallRight, wallTop);
 
-    const geometryWallDivision1 = new THREE.BoxGeometry(1, 250, 999);
+    const geometryWallDivision1 = new THREE.BoxGeometry(15, 250, 650);
     const wallDivision1 = new THREE.Mesh(geometryWallDivision1, new THREE.MeshPhongMaterial({ color: 0xffffff, map: marbleAlphaMap, side: THREE.DoubleSide }));
     wallDivision1.position.x = 200;
-    wallDivision1.position.z = 22;
+    wallDivision1.position.z = 30;
     wallDivision1.castShadow = false;
     wallDivision1.receiveShadow = true;
 
     const geometryWallDivision2 = new THREE.BoxGeometry(300, 250, 1);
     const wallDivision2 = new THREE.Mesh(geometryWallDivision2, new THREE.MeshPhongMaterial({ color: 0xffffff, map: marbleAlphaMap, side: THREE.DoubleSide }));
     wallDivision2.position.x = 350;
+    wallDivision2.position.z = 50;
     wallDivision2.castShadow = false;
     wallDivision2.receiveShadow = true;
     //#endregion paredes galeria
