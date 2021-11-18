@@ -1,6 +1,6 @@
 # Spotify hall of fame
 
-Proyecto final de la materia Gráficas computacionales
+Proyecto final de la materia Gráficas computacionales: https://aroblesm.github.io/proyectoGraficas/
 
 ## Equipo #2
 
