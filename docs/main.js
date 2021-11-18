@@ -35,8 +35,8 @@ if (accessToken) {
         ) +
         `<img id="albumglobal" src="${res.items[0].track.album.images[0].url}"></img>`;
       document.getElementById('albumglobal').addEventListener('click', () => {
-        audioPlayer.playPause(res.items[0].track.preview_url); +
-        `<img id="albumglobal" src="${res.items[0].track.album.images[0].url}"></img>`;
+        audioPlayer.playPause(res.items[0].track.preview_url) +
+        `<img id="albumglobal" src="${res.items[1].track.album.images[1].url}"></img>`;
       document.getElementById('albumglobal').addEventListener('click', () => {
         audioPlayer.playPause(res.items[1].track.preview_url);
       });
