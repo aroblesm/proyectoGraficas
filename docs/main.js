@@ -56,7 +56,7 @@ if (accessToken) {
   document.getElementById('login-page').style.display = 'block';
   document.getElementById('login-btn').addEventListener('click', () => {
     const spotifyAuthParams = new URLSearchParams();
-    spotifyAuthParams.set('client_id', '78d27efbc5e84665b852ca8dd63ea33f');
+    spotifyAuthParams.set('client_id', '1b65edd0776c4ec3a1db2ee16d6c9c18');
     spotifyAuthParams.set('response_type', 'token');
     const original_url = window.location.origin + window.location.pathname;
     spotifyAuthParams.set('redirect_uri', original_url);
