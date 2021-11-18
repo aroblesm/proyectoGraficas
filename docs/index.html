@@ -11,12 +11,29 @@
         width: 200px;
       }
     </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles/login.css">
+    <script type="module" defer src="particles.js"></script>
   </head>
   <body>
+
     <div id="login-page" style="display: none">
-      <h1>Login Page</h1>
-      <button id="login-btn">Log in with Spotify</button>
+      <div class="login-form">
+        <h1 class="text-center">Spotify Hall of fame</h1>
+        <div class="avatar"><i class="material-icons">&#xe0d0;</i></div> 
+          <div class="form-group; text-center">
+            <button id="login-btn" class="btn btn-success">Log in with Spotify</button>
+          </div>
+       </div> 
+      </div> 
     </div>
+    
+    <canvas id="webglcanvas" width="1500" height="300"></canvas>
+    
     <div id="stats-page" style="display: none">
       <h1>Stats page</h1>
       <p>Click on an album to play a 30s preview of the song</p>
@@ -26,6 +43,5 @@
         <div id="top-10-mex"></div>
       </div>
     </div>
-    <a href="particles.html">Demo de partículas</a>
   </body>
 </html>
