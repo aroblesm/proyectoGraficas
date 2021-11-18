@@ -130,7 +130,7 @@ const createScene = async (canvas) => {
 
   // Create a new Three.js scene
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0.3, 0.3, 0.3);
+  scene.background = new THREE.Color(1.0, 1.0, 1.0);
 
   const directionalLight = new THREE.DirectionalLight(0x111111, 1);
   directionalLight.position.set(0, 5, 100);
