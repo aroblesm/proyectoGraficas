@@ -59,9 +59,11 @@ if (accessToken) {
     spotifyAuthParams.set('client_id', '1b65edd0776c4ec3a1db2ee16d6c9c18');
     spotifyAuthParams.set('response_type', 'token');
     const original_url = window.location.origin + window.location.pathname;
+    console.log("Aqui "+original_url);
     spotifyAuthParams.set('redirect_uri', original_url);
     spotifyAuthParams.set('scope', ['user-top-read'].join(' '));
     const params = spotifyAuthParams.toString();
+    console.log("Aqui "+original_url);
     window.location.replace(`https://accounts.spotify.com/authorize?${params}`);
   });
 }
