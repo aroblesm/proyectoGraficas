@@ -16,10 +16,10 @@ let moveForward = false, moveBackward = false, moveLeft = false, moveRight = fal
 
 let prevTime = Date.now();
 let velocity, direction;
-
-let directionalLight = null, spotLight = null, ambientLight = null;
+let ambientLight = null;
 
 let objMtlModelUrl = { obj: 'assets/3D/Portrait/3d-model.obj', mtl: 'assets/3D/Portrait/3d-model.mtl' };
+let objModelUrl = { obj: 'assets/3D/DiscoBall/uploads_files_1946232_bola+de+espelhos.obj', normalMap: 'assets/3D/DiscoBall/Mirror_Ball.1Normal.jpg' };
 
 const floorUrl = "assets/Textures/piso-marmol.jpg";
 
@@ -103,6 +103,31 @@ function onKeyUp(event) {
         case 68: // d
             moveRight = false;
             break;
+    }
+}
+
+async function loadObj(objModelUrl, objectList) {
+    try {
+        const ball = await new OBJLoader().loadAsync(objModelUrl.obj, onProgress, onError);
+        let texture = objModelUrl.hasOwnProperty('normalMap') ? new THREE.TextureLoader().load(objModelUrl.normalMap) : null;
+
+        ball.traverse(function (child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.material.map = texture;
+            }
+        });
+
+        ball.scale.set(0.2, 0.2, 0.2);
+        ball.position.x = -170;
+        ball.position.y = 45;
+        ball.name = "discoBallObj";
+        objectList.push(ball);
+        scene.add(ball);
+    }
+    catch (err) {
+        onError(err);
     }
 }
 
@@ -535,7 +560,7 @@ async function loadObjMtl(objModelUrl, objectList) {
 
 async function loadGLTF() {
     try {
-        //#region marcos y bancos
+        //#region bancos
         const dracoLoad = new DRACOLoader();
         dracoLoad.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.4.0/");
 
@@ -580,12 +605,30 @@ async function loadGLTF() {
         });
 
         scene.add(banco1, banco2);
-        //#endregion muebles y decoracion
+        //#endregion bancos
     }
     catch (err) {
         console.error(err);
     }
 }
+
+// variable to store our intervalID
+let nIntervId;
+
+function changeColor() {
+    // check if already an interval has been set up
+    if (!nIntervId) {
+        nIntervId = setInterval(flashColor, 1500);
+    }
+}
+
+// random para cambiar colorwa
+function flashColor() {
+    const colors = "#" + Math.floor(Math.random() * 16777215).toString(16);
+    ambientLight.color.set(colors);
+    console.log(colors);
+}
+
 
 function createScene(canvas) {
     renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
@@ -602,19 +645,8 @@ function createScene(canvas) {
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xffffff);
 
+    loadObj(objModelUrl, objectList);
     loadObjMtl(objMtlModelUrl, objectList);
-
-    /*  directionalLight = new THREE.DirectionalLight( 0xaaaaaa, 1);
-        directionalLight.position.set(0, 5, 100);
-    
-        scene.add(directionalLight); */
-
-    /*  spotLight = new THREE.SpotLight (0xffffff);
-        spotLight.position.set(0, 8, 100);
-        scene.add(spotLight); */
-
-    ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
-    scene.add(ambientLight);
 
     // A light source positioned directly above the scene, with color fading from the sky color to the ground color. 
     // HemisphereLight( skyColor, groundColor, intensity )
@@ -625,6 +657,9 @@ function createScene(canvas) {
     let light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
     light.position.set(0, -124, 22);
     scene.add(light);
+
+    ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    scene.add(ambientLight);
 
     document.addEventListener('keydown', onKeyDown, false);
     document.addEventListener('keyup', onKeyUp, false);
@@ -711,6 +746,7 @@ function createScene(canvas) {
 
     loadGLTF();
     initPointerLock();
+    changeColor();
 }
 
 function update() {
