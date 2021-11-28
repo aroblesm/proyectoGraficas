@@ -2,7 +2,6 @@ import * as THREE from '../libs/three.js/r131/three.module.js'
 import { GLTFLoader } from '../libs/three.js/r131/loaders/GLTFLoader.js';
 import { DRACOLoader } from '../libs/three.js/r125/loaders/DRACOLoader.js';
 import { PointerLockControls } from '../libs/three.js/r131/controls/PointerLockControls.js';
-import { MTLLoader } from '../libs/three.js/r131/loaders/MTLLoader.js';
 import { OBJLoader } from '../libs/three.js/r131/loaders/OBJLoader.js';
 
 
@@ -18,8 +17,8 @@ let prevTime = Date.now();
 let velocity, direction;
 let ambientLight = null;
 
-let objMtlModelUrl = { obj: 'assets/3D/Portrait/3d-model.obj', mtl: 'assets/3D/Portrait/3d-model.mtl' };
-let objModelUrl = { obj: 'assets/3D/DiscoBall/uploads_files_1946232_bola+de+espelhos.obj', normalMap: 'assets/3D/DiscoBall/Mirror_Ball.1Normal.jpg' };
+let objMtlModelUrl = { obj: 'assets/3D/Portrait/3d-model.obj', url: 'https://i.scdn.co/image/ab67616d0000b2730b35e0df49d4e3ea88f3a2d0'};
+let objModelUrl = { obj: 'assets/3D/DiscoBall/uploads_files_1946232_bola+de+espelhos.obj', normalMap: 'assets/3D/DiscoBall/Mirror_Ball.1Normal.jpg'};
 
 const floorUrl = "assets/Textures/piso-marmol.jpg";
 
@@ -133,17 +132,9 @@ async function loadObj(objModelUrl, objectList) {
 
 async function loadObjMtl(objModelUrl, objectList) {
     try {
-        const mtlLoader = new MTLLoader();
-
-        const materials = await mtlLoader.loadAsync(objModelUrl.mtl, onProgress, onError);
-
-        materials.preload();
-
         const objLoader = new OBJLoader();
-
-        objLoader.setMaterials(materials);
-
         const miTop10 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
+        let textureMiTop10 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(objModelUrl.url) : null;
         const miTop9 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
         const miTop8 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
         const miTop7 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
@@ -181,8 +172,10 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureMiTop10;
             }
         });
+        miTop10.name = 'miTop10';
         miTop10.position.x = -30;
         miTop10.position.y = -40;
         miTop10.position.z = -475;
@@ -194,6 +187,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        miTop9.name = 'miTop9';
         miTop9.position.x = -300;
         miTop9.position.y = -40;
         miTop9.position.z = -475;
@@ -205,6 +199,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        miTop8.name = 'miTop8';
         miTop8.rotation.y = -300;
         miTop8.position.x = -499;
         miTop8.position.y = -40;
@@ -217,6 +212,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        miTop7.name = 'miTop7';
         miTop7.rotation.y = -300;
         miTop7.position.x = -499;
         miTop7.position.y = -40;
@@ -229,6 +225,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        miTop6.name = 'miTop6';
         miTop6.rotation.y = -300;
         miTop6.position.x = -499;
         miTop6.position.y = -40;
@@ -241,6 +238,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        miTop5.name = 'miTop5';
         miTop5.rotation.y = -300;
         miTop5.position.x = -499;
         miTop5.position.y = -40;
@@ -253,6 +251,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        miTop4.name = 'miTop4';
         miTop4.rotation.y = -600;
         miTop4.position.x = -280;
         miTop4.position.y = -40;
@@ -265,6 +264,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        miTop3.name = 'miTop3';
         miTop3.rotation.y = -600;
         miTop3.position.x = -20;
         miTop3.position.y = -40;
@@ -277,6 +277,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        miTop2.name = 'miTop2';
         miTop2.rotation.y = -190;
         miTop2.position.x = 190;
         miTop2.position.y = -40;
@@ -289,6 +290,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        miTop1.name = 'miTop1';
         miTop1.rotation.y = -190;
         miTop1.position.x = 190;
         miTop1.position.y = -40;
@@ -305,6 +307,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMundial1.name = 'topMundial1';
         topMundial1.position.x = 260;
         topMundial1.position.y = -25;
         topMundial1.position.z = -475;
@@ -316,17 +319,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
-        topMundial2.position.x = 400;
-        topMundial2.position.y = -25;
-        topMundial2.position.z = -475;
-        topMundial2.scale.set(0.02, 0.03, 0.03);
-
-        topMundial2.traverse(function (child) {
-            if (child.isMesh) {
-                child.castShadow = true;
-                child.receiveShadow = true;
-            }
-        });
+        topMundial2.name = 'topMundial2';
         topMundial2.position.x = 400;
         topMundial2.position.y = -25;
         topMundial2.position.z = -475;
@@ -338,6 +331,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMundial3.name = 'topMundial3';
         topMundial3.rotation.y = -190;
         topMundial3.position.x = 497;
         topMundial3.position.y = -25;
@@ -350,6 +344,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMundial4.name = 'topMundial4';
         topMundial4.rotation.y = -190;
         topMundial4.position.x = 497;
         topMundial4.position.y = -25;
@@ -362,6 +357,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMundial5.name = 'topMundial5';
         topMundial5.rotation.y = -190;
         topMundial5.position.x = 497;
         topMundial5.position.y = -25;
@@ -374,6 +370,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMundial6.name = 'topMundial6';
         topMundial6.rotation.y = -190;
         topMundial6.position.x = 497;
         topMundial6.position.y = -25;
@@ -386,6 +383,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMundial7.name = 'topMundial7';
         topMundial7.rotation.y = -600;
         topMundial7.position.x = 410;
         topMundial7.position.y = -25;
@@ -398,6 +396,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMundial8.name = 'topMundial8';
         topMundial8.rotation.y = -600;
         topMundial8.position.x = 290;
         topMundial8.position.y = -25;
@@ -410,6 +409,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMundial9.name = 'topMundial9';
         topMundial9.rotation.y = -300;
         topMundial9.position.x = 210;
         topMundial9.position.y = -25;
@@ -422,6 +422,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMundial10.name = 'topMundial10';
         topMundial10.rotation.y = -300;
         topMundial10.position.x = 210;
         topMundial10.position.y = -25;
@@ -438,6 +439,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMexico1.name = 'topMexico1';
         topMexico1.rotation.y = 600;
         topMexico1.position.x = 410;
         topMexico1.position.y = -25;
@@ -450,6 +452,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMexico2.name = 'topMexico2';
         topMexico2.rotation.y = 600;
         topMexico2.position.x = 270;
         topMexico2.position.y = -25;
@@ -462,6 +465,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMexico3.name = 'topMexico3';
         topMexico3.rotation.y = -190;
         topMexico3.position.x = 497;
         topMexico3.position.y = -25;
@@ -474,6 +478,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMexico4.name = 'topMexico4';
         topMexico4.rotation.y = -190;
         topMexico4.position.x = 497;
         topMexico4.position.y = -25;
@@ -486,6 +491,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMexico5.name = 'topMexico5';
         topMexico5.rotation.y = -190;
         topMexico5.position.x = 497;
         topMexico5.position.y = -25;
@@ -498,6 +504,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMexico6.name = 'topMexico6';
         topMexico6.rotation.y = -190;
         topMexico6.position.x = 497;
         topMexico6.position.y = -25;
@@ -510,6 +517,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMexico7.name = 'topMexico7';
         topMexico7.position.x = 290;
         topMexico7.position.y = -25;
         topMexico7.position.z = 52;
@@ -521,6 +529,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMexico8.name = 'topMexico8';
         topMexico8.position.x = 410;
         topMexico8.position.y = -25;
         topMexico8.position.z = 52;
@@ -532,6 +541,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMexico9.name = 'topMexico9';
         topMexico9.rotation.y = 190;
         topMexico9.position.x = 210;
         topMexico9.position.y = -25;
@@ -544,6 +554,7 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.receiveShadow = true;
             }
         });
+        topMexico10.name = 'topMexico10';
         topMexico10.rotation.y = 190;
         topMexico10.position.x = 210;
         topMexico10.position.y = -25;
