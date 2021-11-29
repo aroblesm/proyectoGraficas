@@ -2,13 +2,38 @@ import * as THREE from '../libs/three.js/r131/three.module.js'
 import { GLTFLoader } from '../libs/three.js/r131/loaders/GLTFLoader.js';
 import { DRACOLoader } from '../libs/three.js/r125/loaders/DRACOLoader.js';
 import { PointerLockControls } from '../libs/three.js/r131/controls/PointerLockControls.js';
-import { MTLLoader } from '../libs/three.js/r131/loaders/MTLLoader.js';
 import { OBJLoader } from '../libs/three.js/r131/loaders/OBJLoader.js';
 
+/*
+Variables de  main.js
+*/
+import AudioPlayer from './audio.js';
+
+const audioPlayer = new AudioPlayer();
+
+let imagenURL;
+let audioURL;
+let songName;
+
+let miTopImagenesURL = [];
+let miTopImagenesURL1 = [];
+let miTopAudiosURL = [];
+let miTopNombres = [];
+
+let globalTopImagenesURL = [];
+let globalTopAudiosURL = [];
+let globalTopNombres = [];
+
+let mexicoTopImagenesURL = [];
+let mexicoTopAudiosURL = [];
+let mexicoTopNombres = [];
 
 let camera, scene, renderer, controls, raycaster, objectList = [];
 
 let objects = [];
+let miTopObjetos = [];
+let globalTopObjetos = [];
+let mexicoTopObjetos = [];
 
 let blocker, instructions;
 
@@ -18,10 +43,93 @@ let prevTime = Date.now();
 let velocity, direction;
 let ambientLight = null;
 
-let objMtlModelUrl = { obj: 'assets/3D/Portrait/3d-model.obj', mtl: 'assets/3D/Portrait/3d-model.mtl' };
+let objMtlModelUrl;
+
+//console.log(miTopObjetos)
 let objModelUrl = { obj: 'assets/3D/DiscoBall/uploads_files_1946232_bola+de+espelhos.obj', normalMap: 'assets/3D/DiscoBall/Mirror_Ball.1Normal.jpg' };
 
 const floorUrl = "assets/Textures/piso-marmol.jpg";
+
+// variable to store our intervalID
+let nIntervId;
+
+
+const getAccessToken = () => {
+    const params = new URLSearchParams(window.location.hash.substr(1));
+    if (params.has('access_token') && params.get('token_type') == 'Bearer')
+        return params.get('access_token');
+    return null;
+};
+
+const accessToken = getAccessToken();
+// (async () => {
+
+const spotifyFetch = (urlPath) =>
+    fetch(`https://api.spotify.com/v1/${urlPath}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+    }).then((response) => response.json());
+//})();
+
+
+
+/*
+hasta aqui y el if de abajo con su else también es parte del main
+*/
+
+if (accessToken) {
+    document.getElementById('webglcanvas').style.display = 'block';
+    document.getElementById('blocker').style.display = 'block';
+    document.getElementById('stats-page').style.display = 'block';
+
+    spotifyFetch('me/top/tracks?limit=10&time_range=long_term').then((res) => {
+        //document.getElementById('top-10-user').innerHTML =
+        try {
+            imagenURL = "";
+            audioURL = "";
+            songName = "";
+            for (let k = 0; k <= 9; k++) {
+                imagenURL = res.items[k].album.images[0].url;
+                audioURL = res.items[k].preview_url;
+                songName = res.items[k].name;
+                console.log("Name song " + songName);
+                console.log("URL imagen: " + imagenURL);
+                console.log("URL audio: " + audioURL);
+                miTopImagenesURL.push(imagenURL);
+                //miTopAudiosURL.push(audioURL);
+                //miTopNombres.push(songName);
+                //createObjtMtlModelURL(imagenURL);
+
+            }
+            console.log("dentro de fetch: " + miTopImagenesURL);
+        } catch (e) {
+            console.log("Error" + e);
+        }
+    }).then(function () {
+        //console.log(myval) // logs "foo"
+        console.log("en funcion then: " + miTopImagenesURL);
+        //setTimeout(() => console.log("Ya quedo2"+miTopImagenesURL), 0); // logs "foo"
+
+        console.log('Your access token is', accessToken);
+        objMtlModelUrl = { obj: 'assets/3D/Portrait/3d-model.obj', url: miTopImagenesURL[0] }//url: miTopImagenesURL[k] }
+        console.log(objMtlModelUrl)
+        main();
+        resize();
+    });
+} else {
+    document.getElementById('login-page').style.display = 'block';
+    document.getElementById('login-btn').addEventListener('click', () => {
+        const spotifyAuthParams = new URLSearchParams();
+        spotifyAuthParams.set('client_id', '1b65edd0776c4ec3a1db2ee16d6c9c18');
+        spotifyAuthParams.set('response_type', 'token');
+        const original_url = window.location.origin + window.location.pathname;
+        console.log("Aqui " + original_url);
+        spotifyAuthParams.set('redirect_uri', original_url);
+        spotifyAuthParams.set('scope', ['user-top-read'].join(' '));
+        const params = spotifyAuthParams.toString();
+        console.log("Aqui " + original_url);
+        window.location.replace(`https://accounts.spotify.com/authorize?${params}`);
+    });
+}
 
 function onError(err) { console.error(err); };
 
@@ -29,7 +137,7 @@ function onProgress(xhr) {
     if (xhr.lengthComputable) {
 
         const percentComplete = xhr.loaded / xhr.total * 100;
-        console.log(xhr.target.responseURL, Math.round(percentComplete, 2) + '% downloaded');
+        //console.log(xhr.target.responseURL, Math.round(percentComplete, 2) + '% downloaded');
     }
 }
 
@@ -133,26 +241,27 @@ async function loadObj(objModelUrl, objectList) {
 
 async function loadObjMtl(objModelUrl, objectList) {
     try {
-        const mtlLoader = new MTLLoader();
-
-        const materials = await mtlLoader.loadAsync(objModelUrl.mtl, onProgress, onError);
-
-        materials.preload();
-
         const objLoader = new OBJLoader();
-
-        objLoader.setMaterials(materials);
-
-        const miTop10 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
+        const miTop10 = await objLoader.loadAsync('assets/3D/Portrait/3d-model.obj', onProgress, onError);
+        let textureMiTop10 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[9]) : null;
         const miTop9 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
+        let textureMiTop9 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[8]) : null;
         const miTop8 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
+        let textureMiTop8 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[7]) : null;
         const miTop7 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
+        let textureMiTop7 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[6]) : null;
         const miTop6 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
+        let textureMiTop6 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[5]) : null;
         const miTop5 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
+        let textureMiTop5 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[4]) : null;
         const miTop4 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
+        let textureMiTop4 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[3]) : null;
         const miTop3 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
+        let textureMiTop3 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[2]) : null;
         const miTop2 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
+        let textureMiTop2 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[1]) : null;
         const miTop1 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
+        let textureMiTop1 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[0]) : null;
 
         const topMundial10 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
         const topMundial9 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
@@ -165,6 +274,17 @@ async function loadObjMtl(objModelUrl, objectList) {
         const topMundial2 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
         const topMundial1 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
 
+        let textureTopMundial10 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[9]) : null
+        let textureTopMundial9 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[8]) : null;
+        let textureTopMundial8 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[7]) : null;
+        let textureTopMundial7 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[6]) : null;
+        let textureTopMundial6 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[5]) : null;
+        let textureTopMundial5 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[4]) : null;
+        let textureTopMundial4 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[3]) : null;
+        let textureTopMundial3 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[2]) : null;
+        let textureTopMundial2 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[1]) : null;
+        let textureTopMundial1 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[0]) : null;
+
         const topMexico10 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
         const topMexico9 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
         const topMexico8 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
@@ -176,13 +296,26 @@ async function loadObjMtl(objModelUrl, objectList) {
         const topMexico2 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
         const topMexico1 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
 
+        let textureTopMexico10 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[9]) : null
+        let textureTopMexico9 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[8]) : null;
+        let textureTopMexico8 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[7]) : null;
+        let textureTopMexico7 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[7]) : null;
+        let textureTopMexico6 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[5]) : null;
+        let textureTopMexico5 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[4]) : null;
+        let textureTopMexico4 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[3]) : null;
+        let textureTopMexico3 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[2]) : null;
+        let textureTopMexico2 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[1]) : null;
+        let textureTopMexico1 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[0]) : null;
+
         // Cuadros en sala principal (mi top 10)
         miTop10.traverse(function (child) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureMiTop10;
             }
         });
+        miTop10.name = 'miTop10';
         miTop10.position.x = -30;
         miTop10.position.y = -40;
         miTop10.position.z = -475;
@@ -192,6 +325,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureMiTop9;
             }
         });
         miTop9.position.x = -300;
@@ -203,6 +337,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureMiTop8;
             }
         });
         miTop8.rotation.y = -300;
@@ -215,6 +350,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureMiTop7;
             }
         });
         miTop7.rotation.y = -300;
@@ -227,6 +363,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureMiTop6;
             }
         });
         miTop6.rotation.y = -300;
@@ -239,6 +376,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureMiTop5;
             }
         });
         miTop5.rotation.y = -300;
@@ -251,6 +389,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureMiTop4;
             }
         });
         miTop4.rotation.y = -600;
@@ -263,6 +402,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureMiTop3;
             }
         });
         miTop3.rotation.y = -600;
@@ -275,6 +415,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureMiTop2;
             }
         });
         miTop2.rotation.y = -190;
@@ -287,6 +428,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureMiTop1;
             }
         });
         miTop1.rotation.y = -190;
@@ -303,6 +445,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMundial1;
             }
         });
         topMundial1.position.x = 260;
@@ -314,17 +457,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
-            }
-        });
-        topMundial2.position.x = 400;
-        topMundial2.position.y = -25;
-        topMundial2.position.z = -475;
-        topMundial2.scale.set(0.02, 0.03, 0.03);
-
-        topMundial2.traverse(function (child) {
-            if (child.isMesh) {
-                child.castShadow = true;
-                child.receiveShadow = true;
+                child.material.map = textureTopMundial2;
             }
         });
         topMundial2.position.x = 400;
@@ -336,6 +469,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMundial3;
             }
         });
         topMundial3.rotation.y = -190;
@@ -348,6 +482,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMundial4;
             }
         });
         topMundial4.rotation.y = -190;
@@ -360,6 +495,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMundial5;
             }
         });
         topMundial5.rotation.y = -190;
@@ -372,6 +508,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMundial6;
             }
         });
         topMundial6.rotation.y = -190;
@@ -384,6 +521,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMundial7;
             }
         });
         topMundial7.rotation.y = -600;
@@ -396,6 +534,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMundial8;
             }
         });
         topMundial8.rotation.y = -600;
@@ -408,6 +547,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMundial9;
             }
         });
         topMundial9.rotation.y = -300;
@@ -420,6 +560,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMundial10;
             }
         });
         topMundial10.rotation.y = -300;
@@ -436,6 +577,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMexico1;
             }
         });
         topMexico1.rotation.y = 600;
@@ -448,6 +590,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMexico2;
             }
         });
         topMexico2.rotation.y = 600;
@@ -460,6 +603,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMexico3;
             }
         });
         topMexico3.rotation.y = -190;
@@ -472,6 +616,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMexico4;
             }
         });
         topMexico4.rotation.y = -190;
@@ -484,6 +629,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMexico5;
             }
         });
         topMexico5.rotation.y = -190;
@@ -496,6 +642,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMexico6;
             }
         });
         topMexico6.rotation.y = -190;
@@ -508,6 +655,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMexico7;
             }
         });
         topMexico7.position.x = 290;
@@ -519,6 +667,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMexico8;
             }
         });
         topMexico8.position.x = 410;
@@ -530,6 +679,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMexico9;
             }
         });
         topMexico9.rotation.y = 190;
@@ -542,6 +692,7 @@ async function loadObjMtl(objModelUrl, objectList) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.map = textureTopMexico10;
             }
         });
         topMexico10.rotation.y = 190;
@@ -612,9 +763,6 @@ async function loadGLTF() {
     }
 }
 
-// variable to store our intervalID
-let nIntervId;
-
 function changeColor() {
     // check if already an interval has been set up
     if (!nIntervId) {
@@ -626,7 +774,6 @@ function changeColor() {
 function flashColor() {
     const colors = "#" + Math.floor(Math.random() * 16777215).toString(16);
     ambientLight.color.set(colors);
-    console.log(colors);
 }
 
 
@@ -647,6 +794,7 @@ function createScene(canvas) {
 
     loadObj(objModelUrl, objectList);
     loadObjMtl(objMtlModelUrl, objectList);
+    //loadObjMtl(miTopObjetos[0], objectList);
 
     // A light source positioned directly above the scene, with color fading from the sky color to the ground color. 
     // HemisphereLight( skyColor, groundColor, intensity )
@@ -812,8 +960,8 @@ function resize() {
 }
 
 window.onload = () => {
-    main();
-    resize();
+    //main();
+    //resize();
 };
 
 window.addEventListener('resize', resize, false);
