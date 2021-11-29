@@ -1,4 +1,4 @@
-import * as THREE from '../libs/three.js/r131/three.module.js'
+import * as THREE from '../../libs/three.js/r131/three.module.js'
 import { GLTFLoader } from '../libs/three.js/r131/loaders/GLTFLoader.js';
 import { DRACOLoader } from '../libs/three.js/r125/loaders/DRACOLoader.js';
 import { PointerLockControls } from '../libs/three.js/r131/controls/PointerLockControls.js';
