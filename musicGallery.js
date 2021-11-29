@@ -1,8 +1,9 @@
-import * as THREE from '/../libs/three.js/r131/three.module.js'
-import { GLTFLoader } from '/../libs/three.js/r131/loaders/GLTFLoader.js';
-import { DRACOLoader } from '/../libs/three.js/r125/loaders/DRACOLoader.js';
-import { PointerLockControls } from '/../libs/three.js/r131/controls/PointerLockControls.js';
-import { OBJLoader } from '/../libs/three.js/r131/loaders/OBJLoader.js';
+import * as THREE from '../libs/three.js/r131/three.module.js'
+import { GLTFLoader } from '../libs/three.js/r131/loaders/GLTFLoader.js';
+import { DRACOLoader } from '../libs/three.js/r125/loaders/DRACOLoader.js';
+import { PointerLockControls } from '../libs/three.js/r131/controls/PointerLockControls.js';
+import { OBJLoader } from '../libs/three.js/r131/loaders/OBJLoader.js';
+
 /*
 Variables de  main.js
 */
@@ -15,6 +16,7 @@ let audioURL;
 let songName;
 
 let miTopImagenesURL = [];
+let miTopImagenesURL1 = [];
 let miTopAudiosURL = [];
 let miTopNombres = [];
 
@@ -78,8 +80,7 @@ if (accessToken) {
     document.getElementById('webglcanvas').style.display = 'block';
     document.getElementById('blocker').style.display = 'block';
     document.getElementById('stats-page').style.display = 'block';
-
-    spotifyFetch('me/top/tracks?limit=10&time_range=long_term').then((res) => {
+    spotifyFetch('me/top/tracks?limit=10&time_range=short_term').then((res) => {
         //document.getElementById('top-10-user').innerHTML =
         try {
             imagenURL = "";
@@ -89,11 +90,11 @@ if (accessToken) {
                 imagenURL = res.items[k].album.images[0].url;
                 audioURL = res.items[k].preview_url;
                 songName = res.items[k].name;
-                console.log("Name song " + songName);
+                console.log("Name song short " + songName);
                 console.log("URL imagen: " + imagenURL);
                 console.log("URL audio: " + audioURL);
                 miTopImagenesURL.push(imagenURL);
-                //miTopAudiosURL.push(audioURL);
+                miTopAudiosURL.push(audioURL);
                 //miTopNombres.push(songName);
                 //createObjtMtlModelURL(imagenURL);
 
@@ -105,14 +106,92 @@ if (accessToken) {
     }).then(function () {
         //console.log(myval) // logs "foo"
         console.log("en funcion then: " + miTopImagenesURL);
+        //setTimeout(() => console.log("Ya quedo2"+miTopImagenesURL), 0); // logs "foo"
 
         console.log('Your access token is', accessToken);
-
-        objMtlModelUrl = { obj: 'assets/3D/Portrait/3d-model.obj', url: miTopImagenesURL[0] }
+        objMtlModelUrl = { obj: 'assets/3D/Portrait/3d-model.obj', url: miTopImagenesURL[0] }//url: miTopImagenesURL[k] }
         console.log(objMtlModelUrl)
         main();
         resize();
     });
+
+
+
+    spotifyFetch('me/top/tracks?limit=10&time_range=medium_term').then((res) => {
+        //document.getElementById('top-10-user').innerHTML =
+        try {
+            imagenURL = "";
+            audioURL = "";
+            songName = "";
+            for (let k = 0; k <= 9; k++) {
+                imagenURL = res.items[k].album.images[0].url;
+                audioURL = res.items[k].preview_url;
+                songName = res.items[k].name;
+                console.log("Name song medium" + songName);
+                console.log("URL imagen: " + imagenURL);
+                console.log("URL audio: " + audioURL);
+                globalTopImagenesURL.push(imagenURL);
+                globalTopAudiosURL.push(audioURL);
+                //miTopNombres.push(songName);
+                //createObjtMtlModelURL(imagenURL);
+
+            }
+            console.log("dentro de fetch global: " + globalTopImagenesURL);
+        } catch (e) {
+            console.log("Error" + e);
+        }
+    }).then(function () {
+        //console.log(myval) // logs "foo"
+        console.log("en funcion then: " + globalTopImagenesURL);
+        //setTimeout(() => console.log("Ya quedo2"+miTopImagenesURL), 0); // logs "foo"
+
+        console.log('Your access token is', accessToken);
+        objMtlModelUrl = { obj: 'assets/3D/Portrait/3d-model.obj', url: globalTopImagenesURL[0] }//url: miTopImagenesURL[k] }
+        console.log(objMtlModelUrl)
+        main();
+        resize();
+    });
+
+
+    spotifyFetch('me/top/tracks?limit=10&time_range=long_term').then((res) => {
+        //document.getElementById('top-10-user').innerHTML =
+        try {
+            imagenURL = "";
+            audioURL = "";
+            songName = "";
+            for (let k = 0; k <= 9; k++) {
+                imagenURL = res.items[k].album.images[0].url;
+                audioURL = res.items[k].preview_url;
+                songName = res.items[k].name;
+                console.log("Name song long " + songName);
+                console.log("URL imagen: " + imagenURL);
+                console.log("URL audio: " + audioURL);
+                mexicoTopImagenesURL.push(imagenURL);
+                mexicoTopAudiosURL.push(audioURL);
+                //miTopNombres.push(songName);
+                //createObjtMtlModelURL(imagenURL);
+
+            }
+            console.log("dentro de fetch global: " + mexicoTopImagenesURL);
+        } catch (e) {
+            console.log("Error" + e);
+        }
+    }).then(function () {
+        //console.log(myval) // logs "foo"
+        console.log("en funcion then: " + mexicoTopImagenesURL);
+        //setTimeout(() => console.log("Ya quedo2"+miTopImagenesURL), 0); // logs "foo"
+
+        console.log('Your access token is', accessToken);
+        objMtlModelUrl = { obj: 'assets/3D/Portrait/3d-model.obj', url: mexicoTopImagenesURL[0] }//url: miTopImagenesURL[k] }
+        console.log(objMtlModelUrl)
+        main();
+        resize();
+        mouseInit();
+        //mouseOver();
+        //setTimeout('', 100000);
+        //mouseOut();
+    });
+
 } else {
     document.getElementById('login-page').style.display = 'block';
     document.getElementById('login-btn').addEventListener('click', () => {
@@ -272,16 +351,16 @@ async function loadObjMtl(objModelUrl, objectList) {
         const topMundial2 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
         const topMundial1 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
 
-        let textureTopMundial10 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[9]) : null
-        let textureTopMundial9 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[8]) : null;
-        let textureTopMundial8 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[7]) : null;
-        let textureTopMundial7 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[6]) : null;
-        let textureTopMundial6 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[5]) : null;
-        let textureTopMundial5 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[4]) : null;
-        let textureTopMundial4 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[3]) : null;
-        let textureTopMundial3 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[2]) : null;
-        let textureTopMundial2 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[1]) : null;
-        let textureTopMundial1 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[0]) : null;
+        let textureTopMundial10 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(globalTopImagenesURL[9]) : null
+        let textureTopMundial9 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(globalTopImagenesURL[8]) : null;
+        let textureTopMundial8 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(globalTopImagenesURL[7]) : null;
+        let textureTopMundial7 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(globalTopImagenesURL[6]) : null;
+        let textureTopMundial6 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(globalTopImagenesURL[5]) : null;
+        let textureTopMundial5 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(globalTopImagenesURL[4]) : null;
+        let textureTopMundial4 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(globalTopImagenesURL[3]) : null;
+        let textureTopMundial3 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(globalTopImagenesURL[2]) : null;
+        let textureTopMundial2 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(globalTopImagenesURL[1]) : null;
+        let textureTopMundial1 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(globalTopImagenesURL[0]) : null;
 
         const topMexico10 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
         const topMexico9 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
@@ -294,16 +373,16 @@ async function loadObjMtl(objModelUrl, objectList) {
         const topMexico2 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
         const topMexico1 = await objLoader.loadAsync(objModelUrl.obj, onProgress, onError);
 
-        let textureTopMexico10 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[9]) : null
-        let textureTopMexico9 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[8]) : null;
-        let textureTopMexico8 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[7]) : null;
-        let textureTopMexico7 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[7]) : null;
-        let textureTopMexico6 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[5]) : null;
-        let textureTopMexico5 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[4]) : null;
-        let textureTopMexico4 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[3]) : null;
-        let textureTopMexico3 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[2]) : null;
-        let textureTopMexico2 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[1]) : null;
-        let textureTopMexico1 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(miTopImagenesURL[0]) : null;
+        let textureTopMexico10 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(mexicoTopImagenesURL[9]) : null
+        let textureTopMexico9 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(mexicoTopImagenesURL[8]) : null;
+        let textureTopMexico8 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(mexicoTopImagenesURL[7]) : null;
+        let textureTopMexico7 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(mexicoTopImagenesURL[6]) : null;
+        let textureTopMexico6 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(mexicoTopImagenesURL[5]) : null;
+        let textureTopMexico5 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(mexicoTopImagenesURL[4]) : null;
+        let textureTopMexico4 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(mexicoTopImagenesURL[3]) : null;
+        let textureTopMexico3 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(mexicoTopImagenesURL[2]) : null;
+        let textureTopMexico2 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(mexicoTopImagenesURL[1]) : null;
+        let textureTopMexico1 = objModelUrl.hasOwnProperty('url') ? new THREE.TextureLoader().load(mexicoTopImagenesURL[0]) : null;
 
         // Cuadros en sala principal (mi top 10)
         miTop10.traverse(function (child) {
@@ -314,9 +393,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         miTop10.name = 'miTop10';
-        miTop10.position.x = -30;
-        miTop10.position.y = -40;
+        miTop10.position.x = -10;
         miTop10.position.z = -475;
+        miTop10.rotation.z = Math.PI / 2;
         miTop10.scale.set(0.03, 0.04, 0.04);
 
         miTop9.traverse(function (child) {
@@ -327,8 +406,8 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         miTop9.position.x = -300;
-        miTop9.position.y = -40;
         miTop9.position.z = -475;
+        miTop9.rotation.z = Math.PI / 2;
         miTop9.scale.set(0.03, 0.04, 0.04);
 
         miTop8.traverse(function (child) {
@@ -339,9 +418,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         miTop8.rotation.y = -300;
+        miTop8.rotation.z = Math.PI / 2;
         miTop8.position.x = -499;
-        miTop8.position.y = -40;
-        miTop8.position.z = -275;
+        miTop8.position.z = -325;
         miTop8.scale.set(0.03, 0.04, 0.04);
 
         miTop7.traverse(function (child) {
@@ -352,9 +431,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         miTop7.rotation.y = -300;
+        miTop7.rotation.z = Math.PI / 2;
         miTop7.position.x = -499;
-        miTop7.position.y = -40;
-        miTop7.position.z = -75;
+        miTop7.position.z = -125;
         miTop7.scale.set(0.03, 0.04, 0.04);
 
         miTop6.traverse(function (child) {
@@ -365,9 +444,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         miTop6.rotation.y = -300;
+        miTop6.rotation.z = Math.PI/2;
         miTop6.position.x = -499;
-        miTop6.position.y = -40;
-        miTop6.position.z = 115;
+        miTop6.position.z = 85;
         miTop6.scale.set(0.03, 0.04, 0.04);
 
         miTop5.traverse(function (child) {
@@ -378,9 +457,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         miTop5.rotation.y = -300;
+        miTop5.rotation.z = Math.PI/2;
         miTop5.position.x = -499;
-        miTop5.position.y = -40;
-        miTop5.position.z = 315;
+        miTop5.position.z = 285;
         miTop5.scale.set(0.03, 0.04, 0.04);
 
         miTop4.traverse(function (child) {
@@ -391,8 +470,8 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         miTop4.rotation.y = -600;
-        miTop4.position.x = -280;
-        miTop4.position.y = -40;
+        miTop4.rotation.z = Math.PI/2;
+        miTop4.position.x = -330;
         miTop4.position.z = 518;
         miTop4.scale.set(0.03, 0.04, 0.04);
 
@@ -404,8 +483,8 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         miTop3.rotation.y = -600;
-        miTop3.position.x = -20;
-        miTop3.position.y = -40;
+        miTop3.rotation.z = Math.PI/2;
+        miTop3.position.x = -80;
         miTop3.position.z = 518;
         miTop3.scale.set(0.03, 0.04, 0.04);
 
@@ -417,9 +496,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         miTop2.rotation.y = -190;
+        miTop2.rotation.z = Math.PI/2;
         miTop2.position.x = 190;
-        miTop2.position.y = -40;
-        miTop2.position.z = 150;
+        miTop2.position.z = 190;
         miTop2.scale.set(0.03, 0.04, 0.04);
 
         miTop1.traverse(function (child) {
@@ -430,9 +509,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         miTop1.rotation.y = -190;
+        miTop1.rotation.z = Math.PI/2;
         miTop1.position.x = 190;
-        miTop1.position.y = -40;
-        miTop1.position.z = -80;
+        miTop1.position.z = -20;
         miTop1.scale.set(0.03, 0.04, 0.04);
 
         objectList.push(miTop1, miTop2, miTop3, miTop4, miTop5, miTop6, miTop7, miTop8, miTop9, miTop10);
@@ -446,8 +525,8 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.material.map = textureTopMundial1;
             }
         });
+        topMundial1.rotation.z = Math.PI/2;
         topMundial1.position.x = 260;
-        topMundial1.position.y = -25;
         topMundial1.position.z = -475;
         topMundial1.scale.set(0.02, 0.03, 0.03);
 
@@ -458,8 +537,8 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.material.map = textureTopMundial2;
             }
         });
+        topMundial2.rotation.z = Math.PI/2;
         topMundial2.position.x = 400;
-        topMundial2.position.y = -25;
         topMundial2.position.z = -475;
         topMundial2.scale.set(0.02, 0.03, 0.03);
 
@@ -471,9 +550,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         topMundial3.rotation.y = -190;
+        topMundial3.rotation.z = Math.PI/2;
         topMundial3.position.x = 497;
-        topMundial3.position.y = -25;
-        topMundial3.position.z = -390;
+        topMundial3.position.z = -345;
         topMundial3.scale.set(0.02, 0.03, 0.03);
 
         topMundial4.traverse(function (child) {
@@ -484,9 +563,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         topMundial4.rotation.y = -190;
+        topMundial4.rotation.z = Math.PI/2;
         topMundial4.position.x = 497;
-        topMundial4.position.y = -25;
-        topMundial4.position.z = -270;
+        topMundial4.position.z = -230;
         topMundial4.scale.set(0.02, 0.03, 0.03);
 
         topMundial5.traverse(function (child) {
@@ -497,9 +576,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         topMundial5.rotation.y = -190;
+        topMundial5.rotation.z = Math.PI/2;
         topMundial5.position.x = 497;
-        topMundial5.position.y = -25;
-        topMundial5.position.z = -155;
+        topMundial5.position.z = -110;
         topMundial5.scale.set(0.02, 0.03, 0.03);
 
         topMundial6.traverse(function (child) {
@@ -510,9 +589,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         topMundial6.rotation.y = -190;
+        topMundial6.rotation.z = Math.PI/2;
         topMundial6.position.x = 497;
-        topMundial6.position.y = -25;
-        topMundial6.position.z = -45;
+        topMundial6.position.z = 10;
         topMundial6.scale.set(0.02, 0.03, 0.03);
 
         topMundial7.traverse(function (child) {
@@ -523,8 +602,8 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         topMundial7.rotation.y = -600;
-        topMundial7.position.x = 410;
-        topMundial7.position.y = -25;
+        topMundial7.rotation.z = Math.PI/2;
+        topMundial7.position.x = 365;
         topMundial7.position.z = 45;
         topMundial7.scale.set(0.02, 0.03, 0.03);
 
@@ -536,8 +615,8 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         topMundial8.rotation.y = -600;
-        topMundial8.position.x = 290;
-        topMundial8.position.y = -25;
+        topMundial8.rotation.z = Math.PI/2;
+        topMundial8.position.x = 250;
         topMundial8.position.z = 45;
         topMundial8.scale.set(0.02, 0.03, 0.03);
 
@@ -549,9 +628,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         topMundial9.rotation.y = -300;
+        topMundial9.rotation.z = Math.PI/2;
         topMundial9.position.x = 210;
-        topMundial9.position.y = -25;
-        topMundial9.position.z = -50;
+        topMundial9.position.z = -100;
         topMundial9.scale.set(0.02, 0.03, 0.03);
 
         topMundial10.traverse(function (child) {
@@ -562,9 +641,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         topMundial10.rotation.y = -300;
+        topMundial10.rotation.z = Math.PI/2;
         topMundial10.position.x = 210;
-        topMundial10.position.y = -25;
-        topMundial10.position.z = -190;
+        topMundial10.position.z = -240;
         topMundial10.scale.set(0.02, 0.03, 0.03);
 
         objectList.push(topMundial1, topMundial2, topMundial4, topMundial5, topMundial6, topMundial7, topMundial8, topMundial9, topMundial10);
@@ -579,8 +658,8 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         topMexico1.rotation.y = 600;
-        topMexico1.position.x = 410;
-        topMexico1.position.y = -25;
+        topMexico1.rotation.z = Math.PI/2;
+        topMexico1.position.x = 370;
         topMexico1.position.z = 519;
         topMexico1.scale.set(0.02, 0.03, 0.03);
 
@@ -592,8 +671,8 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         topMexico2.rotation.y = 600;
-        topMexico2.position.x = 270;
-        topMexico2.position.y = -25;
+        topMexico2.rotation.z = Math.PI/2;
+        topMexico2.position.x = 220;
         topMexico2.position.z = 519;
         topMexico2.scale.set(0.02, 0.03, 0.03);
 
@@ -605,9 +684,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         topMexico3.rotation.y = -190;
+        topMexico3.rotation.z = Math.PI/2;
         topMexico3.position.x = 497;
-        topMexico3.position.y = -25;
-        topMexico3.position.z = 450;
+        topMexico3.position.z = 490;
         topMexico3.scale.set(0.02, 0.03, 0.03);
 
         topMexico4.traverse(function (child) {
@@ -618,9 +697,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         topMexico4.rotation.y = -190;
+        topMexico4.rotation.z = Math.PI/2;
         topMexico4.position.x = 497;
-        topMexico4.position.y = -25;
-        topMexico4.position.z = 340;
+        topMexico4.position.z = 390;
         topMexico4.scale.set(0.02, 0.03, 0.03);
 
         topMexico5.traverse(function (child) {
@@ -631,9 +710,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         topMexico5.rotation.y = -190;
+        topMexico5.rotation.z = Math.PI/2;
         topMexico5.position.x = 497;
-        topMexico5.position.y = -25;
-        topMexico5.position.z = 230;
+        topMexico5.position.z = 280;
         topMexico5.scale.set(0.02, 0.03, 0.03);
 
         topMexico6.traverse(function (child) {
@@ -644,9 +723,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         topMexico6.rotation.y = -190;
+        topMexico6.rotation.z = Math.PI/2;
         topMexico6.position.x = 497;
-        topMexico6.position.y = -25;
-        topMexico6.position.z = 120;
+        topMexico6.position.z = 170;
         topMexico6.scale.set(0.02, 0.03, 0.03);
 
         topMexico7.traverse(function (child) {
@@ -656,8 +735,8 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.material.map = textureTopMexico7;
             }
         });
-        topMexico7.position.x = 290;
-        topMexico7.position.y = -25;
+        topMexico7.rotation.z = Math.PI/2;
+        topMexico7.position.x = 330;
         topMexico7.position.z = 52;
         topMexico7.scale.set(0.02, 0.03, 0.03);
 
@@ -668,8 +747,8 @@ async function loadObjMtl(objModelUrl, objectList) {
                 child.material.map = textureTopMexico8;
             }
         });
-        topMexico8.position.x = 410;
-        topMexico8.position.y = -25;
+        topMexico8.rotation.z = Math.PI/2;
+        topMexico8.position.x = 460;
         topMexico8.position.z = 52;
         topMexico8.scale.set(0.02, 0.03, 0.03);
 
@@ -681,9 +760,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         topMexico9.rotation.y = 190;
-        topMexico9.position.x = 210;
-        topMexico9.position.y = -25;
-        topMexico9.position.z = 145;
+        topMexico9.rotation.z = Math.PI/2;
+        topMexico9.position.x = 213;
+        topMexico9.position.z = 100;
         topMexico9.scale.set(0.02, 0.03, 0.03);
 
         topMexico10.traverse(function (child) {
@@ -694,9 +773,9 @@ async function loadObjMtl(objModelUrl, objectList) {
             }
         });
         topMexico10.rotation.y = 190;
-        topMexico10.position.x = 210;
-        topMexico10.position.y = -25;
-        topMexico10.position.z = 280;
+        topMexico10.rotation.z = Math.PI/2;
+        topMexico10.position.x = 213;
+        topMexico10.position.z = 225;
         topMexico10.scale.set(0.02, 0.03, 0.03);
 
         objectList.push(topMexico1, topMexico2, topMexico3, topMexico4, topMexico5, topMexico6, topMexico7, topMexico8, topMexico9, topMexico10);
@@ -706,6 +785,35 @@ async function loadObjMtl(objModelUrl, objectList) {
         onError(err);
     }
 }
+
+function mouseInit(){
+    let j=Math.floor(Math.random() * 3);
+    let i=Math.floor(Math.random() * 10);
+
+    if(j===0){
+        setTimeout(function(){ audioPlayer.playPause(miTopAudiosURL[i])}, 10000);
+        setTimeout(function(){ mouseInit();}, 20000);
+    }
+
+    if(j===1){
+        setTimeout(function(){ audioPlayer.playPause(globalTopAudiosURL[i])}, 10000);
+        setTimeout(function(){ mouseInit();}, 20000);
+    }
+
+    if(j===2){
+        setTimeout(function(){ audioPlayer.playPause(mexicoTopAudiosURL[i])}, 10000);
+        setTimeout(function(){ mouseInit();}, 20000);
+    }
+}
+
+function mouseOver(url) {
+    audioPlayer.playPause(url);
+    //console.log("REpr"+miTopAudiosURL[9]);
+  }
+  
+  function mouseOut() {
+    audioPlayer.playPause(miTopAudiosURL[9]);
+  }
 
 async function loadGLTF() {
     try {
