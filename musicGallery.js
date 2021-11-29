@@ -16,7 +16,6 @@ let audioURL;
 let songName;
 
 let miTopImagenesURL = [];
-let miTopImagenesURL1 = [];
 let miTopAudiosURL = [];
 let miTopNombres = [];
 
@@ -107,10 +106,10 @@ if (accessToken) {
     }).then(function () {
         //console.log(myval) // logs "foo"
         console.log("en funcion then: " + miTopImagenesURL);
-        //setTimeout(() => console.log("Ya quedo2"+miTopImagenesURL), 0); // logs "foo"
 
         console.log('Your access token is', accessToken);
-        objMtlModelUrl = { obj: 'assets/3D/Portrait/3d-model.obj', url: miTopImagenesURL[0] }//url: miTopImagenesURL[k] }
+
+        objMtlModelUrl = { obj: 'assets/3D/Portrait/3d-model.obj', url: miTopImagenesURL[0] }
         console.log(objMtlModelUrl)
         main();
         resize();
